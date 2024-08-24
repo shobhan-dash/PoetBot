@@ -1,11 +1,30 @@
 import * as React from 'react';
 import { Box, IconButton, Textarea } from '@mui/joy';
 import SendIcon from '@mui/icons-material/Send';
-import PoetBotLogo from '../assets/images/poetbot-logo.png'; // Assuming it's an image file
+import PoetBotLogo from '../assets/images/poetbot-logo.png';
 import SideBar from './SideBar';
 
 function Dashboard({ setUserSignIn }) {
   document.title = 'PoetBot | Dashboard';
+
+  const [message, setMessage] = React.useState('');
+
+  const handleSend = () => {
+    if (message.trim() === '') {
+      // Prevent sending if the message is empty
+      setMessage('');
+      return;
+    }
+    console.log(message);
+    setMessage(''); // Clear the textarea
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      handleSend();
+    }
+  };
 
   return (
     <div className="relative flex items-center justify-center h-screen bg-gray-900 text-white">
@@ -28,12 +47,12 @@ function Dashboard({ setUserSignIn }) {
           transform: 'translateX(-50%)',
           display: 'flex',
           alignItems: 'center',
-          backgroundColor: '#2d3748', // gray-800
+          backgroundColor: '#2d3748',
           borderRadius: '8px',
           padding: '8px',
-          width: 'calc(100% - 32px)', // Adjust width with margins
+          width: 'calc(100% - 32px)',
           maxWidth: '1000px',
-          overflow: 'hidden', // Prevents resizing issues
+          overflow: 'hidden',
         }}
       >
         <img src={PoetBotLogo} alt="PoetBot Logo" className="w-8 h-8 rounded" style={{ marginRight: '8px' }} />
@@ -41,6 +60,9 @@ function Dashboard({ setUserSignIn }) {
           placeholder="Type your message..."
           minRows={1}
           maxRows={4}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
           sx={{
             flex: 1,
             fontSize: '16px',
@@ -56,8 +78,9 @@ function Dashboard({ setUserSignIn }) {
         <IconButton
           color="primary"
           sx={{ ml: 1 }}
+          onClick={handleSend}
         >
-          <SendIcon /> {/* Up arrow on the right */}
+          <SendIcon />
         </IconButton>
       </Box>
     </div>
