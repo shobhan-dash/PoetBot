@@ -2,7 +2,7 @@ import React from 'react';
 import { auth, provider } from './auth/firebase-config';
 import { signInWithPopup } from 'firebase/auth';
 import GoogleLogo from '../assets/images/google.svg';
-import PoetBotLogo from '../assets/images/poetbot-logo.png'; // Note the corrected import
+import PoetBotLogo from '../assets/images/poetbot-logo.png';
 import Dashboard from './Dashboard';
 
 function Login({ isUserSignedIn, setUserSignIn }) {
