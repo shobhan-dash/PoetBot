@@ -4,13 +4,14 @@ import Dashboard from './components/Dashboard';
 
 export default function App() {
   const [isUserSignedIn, setUserSignIn] = useState(false);
+  const [userData, setUserData] = useState(null);
   document.title = 'PoetBot';
 
   return (
     isUserSignedIn ? (
-      <Dashboard setUserSignIn={setUserSignIn} />
+      <Dashboard setUserSignIn={setUserSignIn} userData = {userData}/>
     ) : (
-      <Login isUserSignedIn={isUserSignedIn} setUserSignIn={setUserSignIn} />
+      <Login isUserSignedIn={isUserSignedIn} setUserSignIn={setUserSignIn} setUserData = {setUserData} />
     )
   );
 }

@@ -1,21 +1,22 @@
 import * as React from 'react';
-import Avatar from '@mui/joy/Avatar';
-import Box from '@mui/joy/Box';
-import IconButton from '@mui/joy/IconButton';
-import Drawer from '@mui/joy/Drawer';
-import Input from '@mui/joy/Input';
-import List from '@mui/joy/List';
-import ListItem from '@mui/joy/ListItem';
-import ListItemButton from '@mui/joy/ListItemButton';
-import Typography from '@mui/joy/Typography';
-import ModalClose from '@mui/joy/ModalClose';
+import {
+	Avatar, 
+	Box,
+	IconButton,
+	Drawer,
+	Input,
+	List,
+	ListItem,
+	ListItemButton,
+	Typography,
+	ModalClose,
+} from '@mui/joy';
 import Menu from '@mui/icons-material/Menu';
 import Search from '@mui/icons-material/Search';
-
 import { signOut } from 'firebase/auth';
 import { auth } from './auth/firebase-config';
 
-export default function SideBar({ setUserSignIn }) {
+export default function SideBar({ setUserSignIn, userData }) {
 	const [open, setOpen] = React.useState(false);
 	const [searchQuery, setSearchQuery] = React.useState('');
 
@@ -29,7 +30,7 @@ export default function SideBar({ setUserSignIn }) {
 			});
 	};
 
-	const items = [...new Array(20)].map((_, index) => `Item ${index + 1}`);
+	const items = [...new Array(10)].map((_, index) => `Item ${index + 1}`);
 
 	const filteredItems = items.filter((item) =>
 		item.toLowerCase().includes(searchQuery.toLowerCase())
@@ -47,6 +48,8 @@ export default function SideBar({ setUserSignIn }) {
 					width: 240, // Set width of the drawer to be small
 					'& .MuiDrawer-paper': {
 						width: 240, // Ensuring the drawer paper also has this width
+						display: 'flex',
+						flexDirection: 'column',
 					},
 				}}
 			>
@@ -58,6 +61,8 @@ export default function SideBar({ setUserSignIn }) {
 						ml: 'auto',
 						mt: 1,
 						mr: 2,
+						mb: 2,
+						justifyContent: 'space-between',
 					}}
 				>
 					<Typography
@@ -112,9 +117,10 @@ export default function SideBar({ setUserSignIn }) {
 					size="lg"
 					component="nav"
 					sx={{
-						flex: 'none',
+						flex: '1',
 						fontSize: 'xl',
 						textAlign: 'left', // Ensure text is left-aligned
+						overflowY: 'auto',
 						'& > div': { justifyContent: 'flex-start' },
 					}}
 				>
@@ -135,20 +141,22 @@ export default function SideBar({ setUserSignIn }) {
 						pb: 2,
 						borderTop: '1px solid',
 						borderColor: 'divider',
+						mt: 'auto',
+						alignItems: 'center', // Align items vertically
 					}}
 				>
-					<Avatar size="lg" />
-					<div>
-						<Typography level="title-md">Username</Typography>
-						<Typography level="body-sm">
-							<button
-								onClick={handleLogout}
-								className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-800"
-							>
-								Log Out
-							</button>
+					<Avatar size="lg" src={userData.user.photoURL} sx={{ flexShrink: 0 }} />
+					<Box sx={{ flex: 1 }}>
+						<Typography level="title-md" sx={{ mb: 0.5 }}>
+							{userData.user.displayName}
 						</Typography>
-					</div>
+						<button
+							onClick={handleLogout}
+							className="px-4 py-[6px] bg-red-600 text-white rounded-lg hover:bg-red-800"
+						>
+							Log Out
+						</button>
+					</Box>
 				</Box>
 			</Drawer>
 		</React.Fragment>

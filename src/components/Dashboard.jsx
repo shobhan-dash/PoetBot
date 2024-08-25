@@ -6,7 +6,7 @@ import UserPrompt from './UserPrompt';
 import UserMessage from './models/UserMessage';
 import ModelResponse from './models/ModelResponse';
 
-function Dashboard({ setUserSignIn }) {
+function Dashboard({ setUserSignIn, userData }) {
   const [messages, setMessages] = React.useState([]);
 
   // Initialize Socket.IO connection
@@ -53,7 +53,7 @@ function Dashboard({ setUserSignIn }) {
     <div className="relative flex items-center justify-center h-screen bg-gray-900 text-white">
       {/* Drawer Menu Icon at Top Left */}
       <div className="absolute top-0 left-0 p-4">
-        <SideBar setUserSignIn={setUserSignIn} />
+        <SideBar setUserSignIn={setUserSignIn} userData = {userData} />
       </div>
 
       {/* Main Content */}

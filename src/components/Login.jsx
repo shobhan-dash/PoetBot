@@ -5,11 +5,13 @@ import GoogleLogo from '../assets/images/google.svg';
 import PoetBotLogo from '../assets/images/poetbot-logo.png';
 import Dashboard from './Dashboard';
 
-function Login({ isUserSignedIn, setUserSignIn }) {
+function Login({ isUserSignedIn, setUserSignIn, setUserData }) {
 
   const signInWithGoogle = () => {
     signInWithPopup(auth, provider)
       .then((result) => {
+        console.log("Sign in successful: ", result.user);
+        setUserData(result);
         setUserSignIn(true);
       })
       .catch((error) => {
