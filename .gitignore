@@ -1,3 +1,7 @@
+# Backend
+backend/poetbot
+backend/.env
+
 # Logs
 logs
 *.log
