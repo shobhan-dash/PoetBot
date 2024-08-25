@@ -3,19 +3,36 @@ import { Box, IconButton, Textarea } from '@mui/joy';
 import SendIcon from '@mui/icons-material/Send';
 import PoetBotLogo from '../assets/images/poetbot-logo.png';
 import SideBar from './SideBar';
+import io from 'socket.io-client';
 
 function Dashboard({ setUserSignIn }) {
   document.title = 'PoetBot | Dashboard';
 
   const [message, setMessage] = React.useState('');
+  const [response, setResponse] = React.useState('');
+
+  // Initialize Socket.IO connection
+  const socket = React.useMemo(() => io('http://localhost:5000'), []);
+
+  React.useEffect(() => {
+    // Listen for the streamed tokenized response from the backend
+    socket.on('receive_token', (data) => {
+      setResponse((prevResponse) => prevResponse + data.token);
+    });
+
+    return () => {
+      socket.off('receive_token');
+    };
+  }, [socket]);
 
   const handleSend = () => {
     if (message.trim() === '') {
-      // Prevent sending if the message is empty
-      setMessage('');
+      setMessage(''); // Prevent sending if the message is empty
       return;
     }
-    console.log(message);
+
+    setResponse(''); // Clear previous response
+    socket.emit('send_prompt', { prompt: message });
     setMessage(''); // Clear the textarea
   };
 
@@ -36,6 +53,12 @@ function Dashboard({ setUserSignIn }) {
       {/* Main Content */}
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-4">Dashboard</h1>
+        <div
+          className="response-box bg-gray-800 text-white p-4 rounded-lg max-w-3xl mx-auto mt-6"
+          style={{ minHeight: '100px', whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+        >
+          {response || 'Your generated poem will appear here...'}
+        </div>
       </div>
 
       {/* Input Field at the Bottom */}

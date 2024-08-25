@@ -1,6 +1,9 @@
+from flask import Flask, request
+from flask_socketio import SocketIO, emit
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
+import eventlet
 
 # Load the .env file
 load_dotenv()
@@ -12,15 +15,26 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 # Store the base prompt
-base_prompt = "You are PoetBot. Answer prompts in max 10 lines. "
+base_prompt = "You are PoetBot. Answer in max 10 lines. "
+
+# Create Flask app and Socket.IO
+app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Generate and stream tokenized response
 def generate_poem(user_prompt):
     prompt = base_prompt + user_prompt
     response = model.generate_content(prompt, stream=True)
     for token in response:
-        print(token.text, end='', flush=True)
+        yield token.text
 
-# Example user prompt
-user_prompt = "who are you?"
-generate_poem(user_prompt)
+# Socket.IO event handler for receiving the prompt and sending the response
+@socketio.on('send_prompt')
+def handle_send_prompt(data):
+    user_prompt = data['prompt']
+    for token in generate_poem(user_prompt):
+        emit('receive_token', {'token': token})
+
+# Run the Flask app
+if __name__ == '__main__':
+    socketio.run(app, port=5000)
