@@ -10,7 +10,7 @@ function Login({ isUserSignedIn, setUserSignIn, setUserData }) {
   const signInWithGoogle = () => {
     signInWithPopup(auth, provider)
       .then((result) => {
-        console.log("Sign in successful: ", result.user);
+        // console.log("Sign in successful: ", result.user);
         setUserData(result);
         setUserSignIn(true);
       })

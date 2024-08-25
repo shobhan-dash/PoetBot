@@ -15,6 +15,8 @@ function Dashboard({ setUserSignIn, userData }) {
   React.useEffect(() => {
     // Listen for the tokenized response from the backend
     socket.on('receive_token', (data) => {
+      console.log('Received token:', data.token);  // Debugging log
+
       setMessages(prevMessages => {
         const newMessages = [...prevMessages];
         const lastMessage = newMessages[newMessages.length - 1];
@@ -41,6 +43,7 @@ function Dashboard({ setUserSignIn, userData }) {
       socket.off('receive_token');
     };
   }, [socket]);
+
 
   const handleSendPrompt = (message) => {
     const userMessage = { content: message, type: 'userMessage' };
