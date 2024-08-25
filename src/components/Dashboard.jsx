@@ -5,9 +5,11 @@ import SideBar from './SideBar';
 import UserPrompt from './UserPrompt';
 import UserMessage from './models/UserMessage';
 import ModelResponse from './models/ModelResponse';
+import PoetBotLogo from '../assets/images/poetbot-logo.png';
 
 function Dashboard({ setUserSignIn, userData }) {
   const [messages, setMessages] = React.useState([]);
+  const endOfMessagesRef = React.useRef(null);
 
   // Initialize Socket.IO connection
   const socket = React.useMemo(() => io(`${process.env.REACT_APP_BASE_URL}:5000`), []);
@@ -23,14 +25,11 @@ function Dashboard({ setUserSignIn, userData }) {
 
         if (lastMessage && lastMessage.type === 'modelResponse') {
           if (data.token === '\n') {
-            // Finish the current response
-            return [...newMessages, { type: 'modelResponse', tokens: '' }]; // Add a new empty response
+            return [...newMessages, { type: 'modelResponse', tokens: '' }];
           } else {
-            // Append token to the current response
             lastMessage.tokens += data.token;
           }
         } else {
-          // Create a new ModelResponse and start appending tokens
           const newResponse = { type: 'modelResponse', tokens: data.token };
           return [...newMessages, newResponse];
         }
@@ -44,38 +43,53 @@ function Dashboard({ setUserSignIn, userData }) {
     };
   }, [socket]);
 
+  React.useEffect(() => {
+    // Scroll to the end whenever messages change
+    endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const handleSendPrompt = (message) => {
     const userMessage = { content: message, type: 'userMessage' };
     setMessages(prevMessages => [...prevMessages, userMessage]);
-    setMessages(prevMessages => [...prevMessages, { type: 'modelResponse', tokens: '' }]); // Initialize the current response
+    setMessages(prevMessages => [...prevMessages, { type: 'modelResponse', tokens: '' }]);
     socket.emit('send_prompt', { prompt: message });
   };
 
   return (
     <div className="relative flex items-center justify-center h-screen bg-gray-900 text-white">
-      {/* Drawer Menu Icon at Top Left */}
       <div className="absolute top-0 left-0 p-4">
-        <SideBar setUserSignIn={setUserSignIn} userData = {userData} />
+        <SideBar setUserSignIn={setUserSignIn} userData={userData} />
       </div>
 
-      {/* Main Content */}
       <div className="text-center w-full p-4">
-        <h1 className="text-4xl font-bold mb-4">Dashboard</h1>
         <Box className="chat-history text-left rounded" sx={{ maxHeight: '70vh', overflowY: 'auto' }}>
           {messages.map((message, index) => (
             <React.Fragment key={index}>
               {message.type === 'modelResponse' ? (
-                <ModelResponse tokens={message.tokens} />
+                <div className="flex items-start my-2">
+                  <img
+                    src={PoetBotLogo}
+                    alt=""
+                    className="w-8 h-8 mr-2 rounded-full"
+                  />
+                  <ModelResponse tokens={message.tokens} />
+                </div>
               ) : (
-                <UserMessage content={message.content} />
+                <div className="flex items-start justify-end my-2">
+                  {/* <img
+                    src={userData.user.photoURL}
+                    alt=""
+                    className="w-8 h-8 rounded-full ml-2"
+                  /> */}
+                  <UserMessage content={message.content} />
+                </div>
               )}
             </React.Fragment>
           ))}
+          <div ref={endOfMessagesRef} />
         </Box>
       </div>
 
-      {/* Input Field at the Bottom */}
       <UserPrompt onSendPrompt={handleSendPrompt} />
     </div>
   );

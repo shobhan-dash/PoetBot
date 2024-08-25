@@ -28,6 +28,7 @@ def generate_poem(user_prompt):
     response = model.generate_content(prompt, stream=True)
     
     for token in response:
+        # print(token.text)
         yield token.text
 
 @socketio.on('send_prompt')

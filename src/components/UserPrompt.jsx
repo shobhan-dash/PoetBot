@@ -40,7 +40,7 @@ function UserPrompt({ onSendPrompt }) {
                 overflow: 'hidden',
             }}
         >
-            <img src={PoetBotLogo} alt="PoetBot Logo" className="w-8 h-8 rounded" style={{ marginRight: '8px' }} />
+            <img src={PoetBotLogo} alt="PoetBot Logo" style={{ marginRight: '8px', width: '32px', height: '32px', borderRadius: '50%' }} />
             <Textarea
                 placeholder="Type your message..."
                 minRows={1}
@@ -62,10 +62,20 @@ function UserPrompt({ onSendPrompt }) {
             />
             <IconButton
                 color="primary"
-                sx={{ ml: 1 }}
+                sx={{
+                    ml: 1,
+                    '&:hover .MuiSvgIcon-root': {
+                        color: '#2d3748', // Change color on parent hover
+                    },
+                }}
                 onClick={handleSend}
             >
-                <SendIcon />
+                <SendIcon
+                    sx={{
+                        color: 'white',
+                        transition: 'color 0.3s',
+                    }}
+                />
             </IconButton>
         </Box>
     );
