@@ -1,23 +1,40 @@
 import * as React from 'react';
-import { Box, IconButton, Textarea } from '@mui/joy';
-import SendIcon from '@mui/icons-material/Send';
-import PoetBotLogo from '../assets/images/poetbot-logo.png';
-import SideBar from './SideBar';
+import { Box } from '@mui/material';
 import io from 'socket.io-client';
+import SideBar from './SideBar';
+import UserPrompt from './UserPrompt';
+import UserMessage from './models/UserMessage';
+import ModelResponse from './models/ModelResponse';
 
 function Dashboard({ setUserSignIn }) {
-  document.title = 'PoetBot | Dashboard';
-
-  const [message, setMessage] = React.useState('');
-  const [response, setResponse] = React.useState('');
+  const [messages, setMessages] = React.useState([]);
 
   // Initialize Socket.IO connection
-  const socket = React.useMemo(() => io('http://localhost:5000'), []);
+  const socket = React.useMemo(() => io(`${process.env.REACT_APP_BASE_URL}:5000`), []);
 
   React.useEffect(() => {
-    // Listen for the streamed tokenized response from the backend
+    // Listen for the tokenized response from the backend
     socket.on('receive_token', (data) => {
-      setResponse((prevResponse) => prevResponse + data.token);
+      setMessages(prevMessages => {
+        const newMessages = [...prevMessages];
+        const lastMessage = newMessages[newMessages.length - 1];
+
+        if (lastMessage && lastMessage.type === 'modelResponse') {
+          if (data.token === '\n') {
+            // Finish the current response
+            return [...newMessages, { type: 'modelResponse', tokens: '' }]; // Add a new empty response
+          } else {
+            // Append token to the current response
+            lastMessage.tokens += data.token;
+          }
+        } else {
+          // Create a new ModelResponse and start appending tokens
+          const newResponse = { type: 'modelResponse', tokens: data.token };
+          return [...newMessages, newResponse];
+        }
+
+        return newMessages;
+      });
     });
 
     return () => {
@@ -25,22 +42,11 @@ function Dashboard({ setUserSignIn }) {
     };
   }, [socket]);
 
-  const handleSend = () => {
-    if (message.trim() === '') {
-      setMessage(''); // Prevent sending if the message is empty
-      return;
-    }
-
-    setResponse(''); // Clear previous response
+  const handleSendPrompt = (message) => {
+    const userMessage = { content: message, type: 'userMessage' };
+    setMessages(prevMessages => [...prevMessages, userMessage]);
+    setMessages(prevMessages => [...prevMessages, { type: 'modelResponse', tokens: '' }]); // Initialize the current response
     socket.emit('send_prompt', { prompt: message });
-    setMessage(''); // Clear the textarea
-  };
-
-  const handleKeyDown = (event) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      handleSend();
-    }
   };
 
   return (
@@ -51,61 +57,23 @@ function Dashboard({ setUserSignIn }) {
       </div>
 
       {/* Main Content */}
-      <div className="text-center">
+      <div className="text-center w-full p-4">
         <h1 className="text-4xl font-bold mb-4">Dashboard</h1>
-        <div
-          className="response-box bg-gray-800 text-white p-4 rounded-lg max-w-3xl mx-auto mt-6"
-          style={{ minHeight: '100px', whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
-        >
-          {response || 'Your generated poem will appear here...'}
-        </div>
+        <Box className="chat-history text-left rounded" sx={{ maxHeight: '70vh', overflowY: 'auto' }}>
+          {messages.map((message, index) => (
+            <React.Fragment key={index}>
+              {message.type === 'modelResponse' ? (
+                <ModelResponse tokens={message.tokens} />
+              ) : (
+                <UserMessage content={message.content} />
+              )}
+            </React.Fragment>
+          ))}
+        </Box>
       </div>
 
       {/* Input Field at the Bottom */}
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: '16px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          alignItems: 'center',
-          backgroundColor: '#2d3748',
-          borderRadius: '8px',
-          padding: '8px',
-          width: 'calc(100% - 32px)',
-          maxWidth: '1000px',
-          overflow: 'hidden',
-        }}
-      >
-        <img src={PoetBotLogo} alt="PoetBot Logo" className="w-8 h-8 rounded" style={{ marginRight: '8px' }} />
-        <Textarea
-          placeholder="Type your message..."
-          minRows={1}
-          maxRows={4}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-          sx={{
-            flex: 1,
-            fontSize: '16px',
-            border: 'none',
-            resize: 'none',
-            px: 3,
-            py: 1,
-            ml: 1,
-            color: 'white',
-            backgroundColor: 'transparent',
-          }}
-        />
-        <IconButton
-          color="primary"
-          sx={{ ml: 1 }}
-          onClick={handleSend}
-        >
-          <SendIcon />
-        </IconButton>
-      </Box>
+      <UserPrompt onSendPrompt={handleSendPrompt} />
     </div>
   );
 }

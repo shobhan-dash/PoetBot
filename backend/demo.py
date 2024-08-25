@@ -6,15 +6,15 @@ import eventlet
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Handle the user prompt and echo it back
+# Handle the user prompt and stream tokens
 @socketio.on('send_prompt')
 def handle_send_prompt(data):
     user_prompt = data['prompt']
-    response = f"Received user prompt: {user_prompt}"
-    # Stream the response back token by token (simulated here as a single token)
-    for token in response.split():
-        emit('receive_token', {'token': token + ' '})
-    emit('receive_token', {'token': '\n'})  # Optional: to end the response cleanly
+
+    # Simulate token streaming
+    for token in user_prompt:
+        emit('receive_token', {'token': token}, broadcast=True)
+
 
 # Run the Flask app
 if __name__ == '__main__':
