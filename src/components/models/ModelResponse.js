@@ -2,10 +2,10 @@ import React from 'react';
 import { Box, Card, CardContent, Typography, CircularProgress, Button } from '@mui/material';
 import InsightsIcon from '@mui/icons-material/Insights';
 
-const ModelResponse = ({ tokens, isLoading, onAnalyzeEmotion, emotionData, emotionLogo }) => {
+const ModelResponse = ({ tokens, isLoading, onAnalyzeEmotion, emotionData, emotionLogo, isEmotionLoading }) => {
     return (
-        <Box display="flex" flexDirection="column" my={1} alignItems="flex-start">
-            <Card sx={{ maxWidth: '70%', backgroundColor: '#4a5568', color: 'white', flexGrow: 1 }}>
+        <Box display="flex" flexDirection="column" my={1} alignItems="flex-start" maxWidth={'70%'}>
+            <Card sx={{ backgroundColor: '#4a5568', color: 'white', flexGrow: 1 }}>
                 <CardContent>
                     {isLoading ? (
                         <Box display="flex" justifyContent="center" alignItems="center" height="100%">
@@ -16,9 +16,9 @@ const ModelResponse = ({ tokens, isLoading, onAnalyzeEmotion, emotionData, emoti
                             variant="body1"
                             component="pre"
                             sx={{
-                                overflowWrap: 'break-word',
-                                wordBreak: 'break-word',
-                                whiteSpace: 'pre-wrap',
+                                overflowWrap: 'anywhere', // Allow breaks only at word boundaries
+                                whiteSpace: 'pre-wrap',  // Preserve spaces and line breaks
+                                display: 'block', // Ensure full width is utilized
                             }}
                         >
                             {tokens}
@@ -27,7 +27,7 @@ const ModelResponse = ({ tokens, isLoading, onAnalyzeEmotion, emotionData, emoti
                 </CardContent>
             </Card>
             <Box display="flex" flexDirection="column" alignItems="flex-start" mt={2} sx={{ width: '100%' }}>
-                {!emotionData && (
+                {!emotionData && !isEmotionLoading && (
                     <Button
                         onClick={onAnalyzeEmotion}
                         sx={{
@@ -43,6 +43,11 @@ const ModelResponse = ({ tokens, isLoading, onAnalyzeEmotion, emotionData, emoti
                     >
                         <InsightsIcon />
                     </Button>
+                )}
+                {!emotionData && isEmotionLoading && (
+                    <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
+                        <CircularProgress color="inherit" />
+                    </Box>
                 )}
                 {emotionData && (
                     <Box display="flex" alignItems="center" mt={2}>

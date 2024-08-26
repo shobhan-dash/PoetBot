@@ -12,8 +12,11 @@ import SamplePrompts from './SamplePrompts';
 function Dashboard({ setUserSignIn, userData }) {
   const [messages, setMessages] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isEmotionLoading, setIsEmotionLoading] = React.useState(false); // Track emotion analysis loading
   const endOfMessagesRef = React.useRef(null);
   const [message, setMessage] = React.useState('');
+  const [shouldScroll, setShouldScroll] = React.useState(false);
+  const [userInteracting, setUserInteracting] = React.useState(false);
   const socket = React.useMemo(() => io(`${process.env.REACT_APP_BASE_URL}:5000`), []);
   const emotionSocket = React.useMemo(() => io(`${process.env.REACT_APP_BASE_URL}:5001`), []);
 
@@ -29,6 +32,8 @@ function Dashboard({ setUserSignIn, userData }) {
           lastMessage.tokens += data.token;
         } else {
           newMessages.push({ type: 'modelResponse', tokens: data.token });
+          setShouldScroll(true);
+          setUserInteracting(false);
         }
 
         return newMessages;
@@ -41,8 +46,11 @@ function Dashboard({ setUserSignIn, userData }) {
   }, [socket]);
 
   React.useEffect(() => {
-    endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (shouldScroll && !userInteracting) {
+      endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+      setShouldScroll(false);
+    }
+  }, [messages, shouldScroll, userInteracting]);
 
   const handleSendPrompt = (message) => {
     setMessages(prevMessages => [
@@ -51,12 +59,15 @@ function Dashboard({ setUserSignIn, userData }) {
       { type: 'modelResponse', tokens: '', emotionData: null },
     ]);
     setIsLoading(true);
+    setShouldScroll(true);
+    setUserInteracting(false);
     socket.emit('send_prompt', { prompt: message });
   };
 
   const handleAnalyzeEmotion = (index) => {
     const poem = messages[index].tokens;
 
+    setIsEmotionLoading(true); // Set emotion loading to true
     emotionSocket.emit('analyze_emotion_request', { poem });
 
     const handleEmotionResponse = (data) => {
@@ -66,11 +77,13 @@ function Dashboard({ setUserSignIn, userData }) {
         return updatedMessages;
       });
 
-      // Remove the listener to prevent future analyses from updating this message
+      setIsEmotionLoading(false); // Set emotion loading to false
       emotionSocket.off('analyze_emotion_response', handleEmotionResponse);
     };
 
     emotionSocket.on('analyze_emotion_response', handleEmotionResponse);
+
+    setUserInteracting(true);
   };
 
   return (
@@ -96,6 +109,7 @@ function Dashboard({ setUserSignIn, userData }) {
                     onAnalyzeEmotion={() => handleAnalyzeEmotion(index)}
                     emotionData={message.emotionData}
                     emotionLogo={EmotionBotLogo}
+                    isEmotionLoading={isEmotionLoading} // Pass the emotion loading state
                   />
                 </div>
               )}
