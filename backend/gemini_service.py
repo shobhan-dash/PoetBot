@@ -30,5 +30,5 @@ def handle_send_prompt(data):
         emit('receive_token', {'token': token}, broadcast=True)
 
 def run_gemini_app():
-    print("Starting Gemini on port 5000...")
-    socketio.run(app, port=5000)
+    print("Starting Gemini on port 5001...")
+    socketio.run(app, port=5001)
