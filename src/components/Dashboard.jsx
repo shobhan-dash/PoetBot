@@ -7,12 +7,13 @@ import UserMessage from './models/UserMessage';
 import ModelResponse from './models/ModelResponse';
 import PoetBotLogo from '../assets/images/poetbot-logo.png';
 import EmotionBotLogo from '../assets/images/emotionbot-logo.png';
+import SamplePrompts from './SamplePrompts';
 
 function Dashboard({ setUserSignIn, userData }) {
   const [messages, setMessages] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false); // Track loading state
   const endOfMessagesRef = React.useRef(null);
-
+  const [message, setMessage] = React.useState(''); // input field
   // Initialize Socket.IO connections
   const socket = React.useMemo(() => io(`${process.env.REACT_APP_BASE_URL}:5000`), []);
   const emotionSocket = React.useMemo(() => io(`${process.env.REACT_APP_BASE_URL}:5001`), []);
@@ -111,9 +112,9 @@ function Dashboard({ setUserSignIn, userData }) {
           ))}
           <div ref={endOfMessagesRef} />
         </Box>
+      {messages.length === 0 && <SamplePrompts onSendPrompt={handleSendPrompt} />}
       </div>
-
-      <UserPrompt onSendPrompt={handleSendPrompt} />
+      <UserPrompt message={message} setMessage={setMessage} onSendPrompt={handleSendPrompt} />
     </div>
   );
 }

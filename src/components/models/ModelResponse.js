@@ -31,10 +31,21 @@ const ModelResponse = ({ tokens, isLoading, onAnalyzeEmotion, emotionData, emoti
                 {!emotionData && (
                     <Button
                         onClick={onAnalyzeEmotion}
-                        sx={{ minWidth: 'auto', padding: 1, marginBottom: 2 }}
+                        sx={{
+                            minWidth: 'auto',
+                            padding: 1,
+                            marginBottom: 2,
+                            borderRadius: '8px', // Rounded borders
+                            backgroundColor: 'transparent', // Initial transparent background
+                            '&:hover': {
+                                backgroundColor: '#2d3748', // Slight gray color on hover
+                            },
+                        }}
                     >
+                        {/* <p className='text-[#ffd856] text-sm left-0 px-4'>Analyze</p> */}
                         <InsightsIcon />
                     </Button>
+
                 )}
                 {emotionData && (
                     <Box display="flex" alignItems="center" mt={2}>

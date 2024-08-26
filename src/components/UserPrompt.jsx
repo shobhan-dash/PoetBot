@@ -3,9 +3,7 @@ import { Box, IconButton, Textarea } from '@mui/joy';
 import SendIcon from '@mui/icons-material/Send';
 import PoetBotLogo from '../assets/images/poetbot-logo.png';
 
-function UserPrompt({ onSendPrompt }) {
-    const [message, setMessage] = React.useState('');
-
+function UserPrompt({ message, setMessage, onSendPrompt }) {
     const handleSend = () => {
         if (message.trim() === '') {
             setMessage(''); // Prevent sending if the message is empty

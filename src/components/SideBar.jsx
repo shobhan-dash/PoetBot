@@ -38,7 +38,7 @@ export default function SideBar({ setUserSignIn, userData }) {
 
 	return (
 		<React.Fragment>
-			<IconButton variant="outlined" color="neutral" onClick={() => setOpen(true)}>
+			<IconButton variant="outlined" color="white" onClick={() => setOpen(true)}>
 				<Menu />
 			</IconButton>
 			<Drawer
@@ -76,7 +76,8 @@ export default function SideBar({ setUserSignIn, userData }) {
 					</Typography>
 					<ModalClose id="close-icon" sx={{ position: 'initial' }} />
 				</Box>
-
+				<p className='text-center font-bold text-lg'>Chat History</p>
+				<p className='text-center'>Coming Soon...</p>
 				<Input
 					size="sm"
 					placeholder="Search"
