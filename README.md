@@ -55,5 +55,5 @@
    In a terminal within the `backend` directory, activate the virtual environment and run:
    ```bash
    source poetbot/bin/activate  # (Use the Windows command if applicable)
-   python3 gemini.py
+   python3 app.py
    ```
