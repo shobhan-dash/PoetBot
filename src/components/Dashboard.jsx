@@ -11,31 +11,24 @@ import SamplePrompts from './SamplePrompts';
 
 function Dashboard({ setUserSignIn, userData }) {
   const [messages, setMessages] = React.useState([]);
-  const [isLoading, setIsLoading] = React.useState(false); // Track loading state
+  const [isLoading, setIsLoading] = React.useState(false);
   const endOfMessagesRef = React.useRef(null);
-  const [message, setMessage] = React.useState(''); // input field
-  // Initialize Socket.IO connections
+  const [message, setMessage] = React.useState('');
   const socket = React.useMemo(() => io(`${process.env.REACT_APP_BASE_URL}:5000`), []);
   const emotionSocket = React.useMemo(() => io(`${process.env.REACT_APP_BASE_URL}:5001`), []);
 
   React.useEffect(() => {
-    // Listen for the tokenized response from the backend
     socket.on('receive_token', (data) => {
-      setIsLoading(false);  // Stop loading when the first token is received
+      setIsLoading(false);
 
       setMessages(prevMessages => {
         const newMessages = [...prevMessages];
         const lastMessage = newMessages[newMessages.length - 1];
 
         if (lastMessage && lastMessage.type === 'modelResponse') {
-          if (data.token === '\n') {
-            return [...newMessages, { type: 'modelResponse', tokens: '' }];
-          } else {
-            lastMessage.tokens += data.token;
-          }
+          lastMessage.tokens += data.token;
         } else {
-          const newResponse = { type: 'modelResponse', tokens: data.token };
-          return [...newMessages, newResponse];
+          newMessages.push({ type: 'modelResponse', tokens: data.token });
         }
 
         return newMessages;
@@ -48,33 +41,36 @@ function Dashboard({ setUserSignIn, userData }) {
   }, [socket]);
 
   React.useEffect(() => {
-    // Scroll to the end whenever messages change
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSendPrompt = (message) => {
-    const userMessage = { content: message, type: 'userMessage' };
-    setMessages(prevMessages => [...prevMessages, userMessage]);
-    setMessages(prevMessages => [...prevMessages, { type: 'modelResponse', tokens: '' }]);
-    setIsLoading(true);  // Start loading when the prompt is sent
+    setMessages(prevMessages => [
+      ...prevMessages,
+      { type: 'userMessage', content: message },
+      { type: 'modelResponse', tokens: '', emotionData: null },
+    ]);
+    setIsLoading(true);
     socket.emit('send_prompt', { prompt: message });
   };
 
-  const handleAnalyzeEmotion = (poem) => {
+  const handleAnalyzeEmotion = (index) => {
+    const poem = messages[index].tokens;
+
     emotionSocket.emit('analyze_emotion_request', { poem });
 
-    emotionSocket.on('analyze_emotion_response', (data) => {
+    const handleEmotionResponse = (data) => {
       setMessages(prevMessages => {
         const updatedMessages = [...prevMessages];
-        const lastMessage = updatedMessages[updatedMessages.length - 1];
-
-        if (lastMessage && lastMessage.type === 'modelResponse') {
-          lastMessage.emotionData = data;
-        }
-
+        updatedMessages[index].emotionData = data;
         return updatedMessages;
       });
-    });
+
+      // Remove the listener to prevent future analyses from updating this message
+      emotionSocket.off('analyze_emotion_response', handleEmotionResponse);
+    };
+
+    emotionSocket.on('analyze_emotion_response', handleEmotionResponse);
   };
 
   return (
@@ -97,9 +93,9 @@ function Dashboard({ setUserSignIn, userData }) {
                   <ModelResponse
                     tokens={message.tokens}
                     isLoading={isLoading && index === messages.length - 1}
-                    onAnalyzeEmotion={() => handleAnalyzeEmotion(message.tokens)}
+                    onAnalyzeEmotion={() => handleAnalyzeEmotion(index)}
                     emotionData={message.emotionData}
-                    emotionLogo={EmotionBotLogo} // Pass EmotionBotLogo to ModelResponse
+                    emotionLogo={EmotionBotLogo}
                   />
                 </div>
               )}
@@ -112,7 +108,7 @@ function Dashboard({ setUserSignIn, userData }) {
           ))}
           <div ref={endOfMessagesRef} />
         </Box>
-      {messages.length === 0 && <SamplePrompts onSendPrompt={handleSendPrompt} />}
+        {messages.length === 0 && <SamplePrompts onSendPrompt={handleSendPrompt} />}
       </div>
       <UserPrompt message={message} setMessage={setMessage} onSendPrompt={handleSendPrompt} />
     </div>

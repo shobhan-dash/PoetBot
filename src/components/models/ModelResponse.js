@@ -5,7 +5,6 @@ import InsightsIcon from '@mui/icons-material/Insights';
 const ModelResponse = ({ tokens, isLoading, onAnalyzeEmotion, emotionData, emotionLogo }) => {
     return (
         <Box display="flex" flexDirection="column" my={1} alignItems="flex-start">
-            {/* First Box with PoetBotLogo */}
             <Card sx={{ maxWidth: '70%', backgroundColor: '#4a5568', color: 'white', flexGrow: 1 }}>
                 <CardContent>
                     {isLoading ? (
@@ -17,9 +16,9 @@ const ModelResponse = ({ tokens, isLoading, onAnalyzeEmotion, emotionData, emoti
                             variant="body1"
                             component="pre"
                             sx={{
-                                overflowWrap: 'break-word', // Ensures words break to prevent overflow
-                                wordBreak: 'break-word',    // Handles long words or URLs
-                                whiteSpace: 'pre-wrap',     // Preserves line breaks from the input
+                                overflowWrap: 'break-word',
+                                wordBreak: 'break-word',
+                                whiteSpace: 'pre-wrap',
                             }}
                         >
                             {tokens}
@@ -35,17 +34,15 @@ const ModelResponse = ({ tokens, isLoading, onAnalyzeEmotion, emotionData, emoti
                             minWidth: 'auto',
                             padding: 1,
                             marginBottom: 2,
-                            borderRadius: '8px', // Rounded borders
-                            backgroundColor: 'transparent', // Initial transparent background
+                            borderRadius: '8px',
+                            backgroundColor: 'transparent',
                             '&:hover': {
-                                backgroundColor: '#2d3748', // Slight gray color on hover
+                                backgroundColor: '#2d3748',
                             },
                         }}
                     >
-                        {/* <p className='text-[#ffd856] text-sm left-0 px-4'>Analyze</p> */}
                         <InsightsIcon />
                     </Button>
-
                 )}
                 {emotionData && (
                     <Box display="flex" alignItems="center" mt={2}>
