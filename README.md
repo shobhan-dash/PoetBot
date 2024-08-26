@@ -1,13 +1,58 @@
+
 # PoetBot
-Real-time AI Poetry Generation with Emotion Visualization
+**Real-time AI Poetry Generation with Emotion Visualization**
 
-## Installation Steps (For Linux)
+## Installation
 
-- Clone the Repository: `https://github.com/si-dadi/PoetBot.git`
-- Navigate to that specific directory and open up a terminal and run `npm install`
-- Open up another terminal in the backend folder and run the following to create a new virtual enviournment for the project: `python -m venv poetbot && source poetbot/bin/activate`
-- Install required libraries: `pip install -r requirements.txt`
+1. **Clone the Repository:**  
+   ```bash
+   git clone https://github.com/si-dadi/PoetBot.git
+   ```
 
-## Run the app
-- To start the frontend, execute `npm start`.
-- For backend, open up a new terminal in the backend folder, activate the virtual enviournment as instructed above  and execute `python3 gemini.py`.
+2. **Install Frontend Dependencies:**  
+   Navigate to the project directory:  
+   ```bash
+   cd PoetBot
+   ```  
+   Then run:  
+   ```bash
+   npm install
+   ```
+
+3. **Set Up Backend:**
+
+   - Open a terminal in the `backend` directory:
+     ```bash
+     cd backend
+     ```
+
+   - Create and activate a virtual environment:
+     - **Linux/MacOS:**
+       ```bash
+       python3 -m venv poetbot
+       source poetbot/bin/activate
+       ```
+     - **Windows:**
+       ```cmd
+       python -m venv poetbot
+       poetbot\Scripts\activate
+       ```
+
+   - Install required libraries:
+     ```bash
+     pip install -r requirements.txt
+     ```
+
+## Running the App
+
+1. **Start the Frontend:**  
+   ```bash
+   npm start
+   ```
+
+2. **Start the Backend:**  
+   In a terminal within the `backend` directory, activate the virtual environment and run:
+   ```bash
+   source poetbot/bin/activate  # (Use the Windows command if applicable)
+   python3 gemini.py
+   ```
