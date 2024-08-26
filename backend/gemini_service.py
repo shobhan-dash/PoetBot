@@ -32,3 +32,6 @@ def handle_send_prompt(data):
 def run_gemini_app():
     print("Starting Gemini on port 5001...")
     socketio.run(app, port=5001)
+
+if __name__ == "__main__":
+    run_gemini_app()

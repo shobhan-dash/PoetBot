@@ -2,9 +2,10 @@ from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 import uuid
 from collections import deque
-import threading
+from flask_cors import CORS  # Import CORS
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Queues and counters for managing ports and UUIDs
@@ -13,6 +14,7 @@ uuid_map = {}
 port_queue = deque([5001, 5002])  # Ports for Gemini and Emotion Bot
 
 # Lock to ensure thread-safety when accessing shared resources
+import threading
 lock = threading.Lock()
 
 @app.route('/assign', methods=['GET'])
