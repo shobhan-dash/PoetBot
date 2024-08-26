@@ -9,6 +9,7 @@ import PoetBotLogo from '../assets/images/poetbot-logo.png';
 
 function Dashboard({ setUserSignIn, userData }) {
   const [messages, setMessages] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(false); // Track loading state
   const endOfMessagesRef = React.useRef(null);
 
   // Initialize Socket.IO connection
@@ -17,7 +18,7 @@ function Dashboard({ setUserSignIn, userData }) {
   React.useEffect(() => {
     // Listen for the tokenized response from the backend
     socket.on('receive_token', (data) => {
-      console.log('Received token:', data.token);  // Debugging log
+      setIsLoading(false);  // Stop loading when the first token is received
 
       setMessages(prevMessages => {
         const newMessages = [...prevMessages];
@@ -52,6 +53,7 @@ function Dashboard({ setUserSignIn, userData }) {
     const userMessage = { content: message, type: 'userMessage' };
     setMessages(prevMessages => [...prevMessages, userMessage]);
     setMessages(prevMessages => [...prevMessages, { type: 'modelResponse', tokens: '' }]);
+    setIsLoading(true);  // Start loading when the prompt is sent
     socket.emit('send_prompt', { prompt: message });
   };
 
@@ -72,7 +74,7 @@ function Dashboard({ setUserSignIn, userData }) {
                     alt=""
                     className="w-8 h-8 mr-2 rounded-full"
                   />
-                  <ModelResponse tokens={message.tokens} />
+                  <ModelResponse tokens={message.tokens} isLoading={isLoading && index === messages.length - 1} />
                 </div>
               ) : (
                 <div className="flex items-start justify-end my-2">
