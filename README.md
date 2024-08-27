@@ -1,4 +1,3 @@
-
 # PoetBot
 **Real-time AI Poetry Generation with Emotion Visualization**
 
@@ -10,14 +9,14 @@
    ```
 
 2. **Install Frontend Dependencies:**  
-   Navigate to the project directory:  
-   ```bash
-   cd PoetBot
-   ```  
-   Then run:  
-   ```bash
-   npm install
-   ```
+   - Open a terminal in the `frontend` directory:
+     ```bash
+     cd frontend
+     ```
+   - Then run:  
+      ```bash
+      npm install
+      ```
 
 3. **Set Up Backend:**
 
