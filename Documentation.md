@@ -2,14 +2,7 @@
 
 1. Handling Duplicate Tokens with SocketIO
 - Issue: The client side experienced issues with SocketIO catching duplicate tokens during transmission.
-- Resolution: 
-
-2. Content Overlap Across Multiple Tabs
-- Issue: When the website was opened in multiple tabs, each tab received content meant for the others (due to sockets broadcasting the contents).
-- Resolution: Implemented a load balancer which assigns each opened instance of the website a UUID and maintains a queue of requests from all sockets to be handed over to the processes running on port 5001 (gemini) and 5002 (emotion bot) 
-
-    Note: A better way would've been using Redis queues for this, should be definitely implemented at enterprise level!
-
+- Resolution: TEMPORARY FIX - React.StrictMode was causing setState to fire twice, removing that solved it.
 
 ### Hosting
 1. Using my free Azure Student account I created a fresh Linux Virtual Machine and set up node, python, nginx, certbot, etc on it.
