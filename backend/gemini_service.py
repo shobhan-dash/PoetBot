@@ -27,11 +27,8 @@ def handle_send_prompt(data):
     user_prompt = data['prompt']
     for token in generate_poem(user_prompt):
         socketio.sleep(0)
-        emit('receive_token', {'token': token}, broadcast=True)
+        emit('receive_token', {'token': token}, broadcast=False)
 
 def run_gemini_app():
-    print("Starting Gemini on port 5001...")
-    socketio.run(app, port=5001)
-
-if __name__ == "__main__":
-    run_gemini_app()
+    print("Starting Gemini on port 5000...")
+    socketio.run(app, port=5000)

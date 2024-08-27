@@ -12,68 +12,38 @@ import SamplePrompts from './SamplePrompts';
 function Dashboard({ setUserSignIn, userData }) {
   const [messages, setMessages] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [isEmotionLoading, setIsEmotionLoading] = React.useState(false);
+  const [isEmotionLoading, setIsEmotionLoading] = React.useState(false); // Track emotion analysis loading
   const endOfMessagesRef = React.useRef(null);
   const [message, setMessage] = React.useState('');
   const [shouldScroll, setShouldScroll] = React.useState(false);
   const [userInteracting, setUserInteracting] = React.useState(false);
-  const [uuid, setUuid] = React.useState(null);
-  const [geminiSocket, setGeminiSocket] = React.useState(null);
-  const [emotionSocket, setEmotionSocket] = React.useState(null);
+  const socket = React.useMemo(() => io(`${process.env.REACT_APP_BASE_URL}:5000`), []);
+  const emotionSocket = React.useMemo(() => io(`${process.env.REACT_APP_BASE_URL}:5001`), []);
 
   React.useEffect(() => {
-    // Fetch a new UUID and ports from the load balancer
-    fetch(`${process.env.REACT_APP_BASE_URL}:5000/assign`)
-      .then(response => response.json())
-      .then(data => {
-        setUuid(data.uuid);
+    socket.on('receive_token', (data) => {
+      setIsLoading(false);
 
-        // Connect to Gemini and Emotion Bot services using UUID
-        const gemini = io(`${process.env.REACT_APP_BASE_URL}:5001`, {
-          query: { uuid: data.uuid },
-        });
-        const emotion = io(`${process.env.REACT_APP_BASE_URL}:5002`, {
-          query: { uuid: data.uuid },
-        });
+      setMessages(prevMessages => {
+        const newMessages = [...prevMessages];
+        const lastMessage = newMessages[newMessages.length - 1];
 
-        setGeminiSocket(gemini);
-        setEmotionSocket(emotion);
+        if (lastMessage && lastMessage.type === 'modelResponse') {
+          lastMessage.tokens += data.token;
+        } else {
+          newMessages.push({ type: 'modelResponse', tokens: data.token });
+          setShouldScroll(true);
+          setUserInteracting(false);
+        }
 
-        // Clean up on component unmount
-        return () => {
-          gemini.disconnect();
-          emotion.disconnect();
-        };
-      })
-      .catch(error => console.error("Error fetching UUID:", error));
-  }, []);
-
-  React.useEffect(() => {
-    if (geminiSocket) {
-      geminiSocket.on('receive_token', (data) => {
-        setIsLoading(false);
-
-        setMessages(prevMessages => {
-          const newMessages = [...prevMessages];
-          const lastMessage = newMessages[newMessages.length - 1];
-
-          if (lastMessage && lastMessage.type === 'modelResponse') {
-            lastMessage.tokens += data.token;
-          } else {
-            newMessages.push({ type: 'modelResponse', tokens: data.token });
-            setShouldScroll(true);
-            setUserInteracting(false);
-          }
-
-          return newMessages;
-        });
+        return newMessages;
       });
+    });
 
-      return () => {
-        geminiSocket.off('receive_token');
-      };
-    }
-  }, [geminiSocket]);
+    return () => {
+      socket.off('receive_token');
+    };
+  }, [socket]);
 
   React.useEffect(() => {
     if (shouldScroll && !userInteracting) {
@@ -91,31 +61,27 @@ function Dashboard({ setUserSignIn, userData }) {
     setIsLoading(true);
     setShouldScroll(true);
     setUserInteracting(false);
-    if (geminiSocket) {
-      geminiSocket.emit('send_prompt', { prompt: message });
-    }
+    socket.emit('send_prompt', { prompt: message });
   };
 
   const handleAnalyzeEmotion = (index) => {
     const poem = messages[index].tokens;
 
-    setIsEmotionLoading(true);
-    if (emotionSocket) {
-      emotionSocket.emit('analyze_emotion_request', { poem });
+    setIsEmotionLoading(true); // Set emotion loading to true
+    emotionSocket.emit('analyze_emotion_request', { poem });
 
-      const handleEmotionResponse = (data) => {
-        setMessages(prevMessages => {
-          const updatedMessages = [...prevMessages];
-          updatedMessages[index].emotionData = data;
-          return updatedMessages;
-        });
+    const handleEmotionResponse = (data) => {
+      setMessages(prevMessages => {
+        const updatedMessages = [...prevMessages];
+        updatedMessages[index].emotionData = data;
+        return updatedMessages;
+      });
 
-        setIsEmotionLoading(false);
-        emotionSocket.off('analyze_emotion_response', handleEmotionResponse);
-      };
+      setIsEmotionLoading(false); // Set emotion loading to false
+      emotionSocket.off('analyze_emotion_response', handleEmotionResponse);
+    };
 
-      emotionSocket.on('analyze_emotion_response', handleEmotionResponse);
-    }
+    emotionSocket.on('analyze_emotion_response', handleEmotionResponse);
 
     setUserInteracting(true);
   };
