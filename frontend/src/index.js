@@ -5,8 +5,8 @@ import App from './App';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
+  // [TODO]: Find out why StrictMode causes multiple socket connections
   // <React.StrictMode>
-  //   <App />
+  <App />
   // </React.StrictMode>
-  <App/>
 );

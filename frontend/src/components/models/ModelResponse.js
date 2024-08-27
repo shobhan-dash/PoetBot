@@ -3,9 +3,11 @@ import { Box, Card, CardContent, Typography, CircularProgress, Button } from '@m
 import InsightsIcon from '@mui/icons-material/Insights';
 
 const ModelResponse = ({ tokens, isLoading, onAnalyzeEmotion, emotionData, emotionLogo, isEmotionLoading }) => {
+    const isError = tokens.includes("[Error]");
+
     return (
         <Box display="flex" flexDirection="column" my={1} alignItems="flex-start" maxWidth={'70%'}>
-            <Card sx={{ backgroundColor: '#4a5568', color: 'white', flexGrow: 1 }}>
+            <Card sx={{ backgroundColor: isError ? '#f56565' : '#4a5568', color: 'white', flexGrow: 1 }}>
                 <CardContent>
                     {isLoading ? (
                         <Box display="flex" justifyContent="center" alignItems="center" height="100%">

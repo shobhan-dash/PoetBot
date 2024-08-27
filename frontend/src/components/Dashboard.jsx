@@ -12,7 +12,7 @@ import SamplePrompts from './SamplePrompts';
 function Dashboard({ setUserSignIn, userData }) {
   const [messages, setMessages] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [isEmotionLoading, setIsEmotionLoading] = React.useState(false); // Track emotion analysis loading
+  const [isEmotionLoading, setIsEmotionLoading] = React.useState([]);
   const endOfMessagesRef = React.useRef(null);
   const [message, setMessage] = React.useState('');
   const [shouldScroll, setShouldScroll] = React.useState(false);
@@ -67,7 +67,12 @@ function Dashboard({ setUserSignIn, userData }) {
   const handleAnalyzeEmotion = (index) => {
     const poem = messages[index].tokens;
 
-    setIsEmotionLoading(true); // Set emotion loading to true
+    setIsEmotionLoading(prevLoading => {
+      const updatedLoading = [...prevLoading];
+      updatedLoading[index] = true;
+      return updatedLoading;
+    });
+
     emotionSocket.emit('analyze_emotion_request', { poem });
 
     const handleEmotionResponse = (data) => {
@@ -77,7 +82,12 @@ function Dashboard({ setUserSignIn, userData }) {
         return updatedMessages;
       });
 
-      setIsEmotionLoading(false); // Set emotion loading to false
+      setIsEmotionLoading(prevLoading => {
+        const updatedLoading = [...prevLoading];
+        updatedLoading[index] = false;
+        return updatedLoading;
+      });
+
       emotionSocket.off('analyze_emotion_response', handleEmotionResponse);
     };
 
@@ -109,7 +119,7 @@ function Dashboard({ setUserSignIn, userData }) {
                     onAnalyzeEmotion={() => handleAnalyzeEmotion(index)}
                     emotionData={message.emotionData}
                     emotionLogo={EmotionBotLogo}
-                    isEmotionLoading={isEmotionLoading} // Pass the emotion loading state
+                    isEmotionLoading={isEmotionLoading[index]}
                   />
                 </div>
               )}

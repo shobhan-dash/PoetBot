@@ -3,6 +3,7 @@
 1. Handling Duplicate Tokens with SocketIO
 - Issue: The client side experienced issues with SocketIO catching duplicate tokens during transmission.
 - Resolution: TEMPORARY FIX - React.StrictMode was causing setState to fire twice, removing that solved it.
+    Find more on this here: https://github.com/facebook/react/issues/12856
 
 ### Hosting
 1. Using my free Azure Student account I created a fresh Linux Virtual Machine and set up node, python, nginx, certbot, etc on it.
