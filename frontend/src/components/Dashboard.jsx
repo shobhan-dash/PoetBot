@@ -17,11 +17,11 @@ function Dashboard({ setUserSignIn, userData }) {
   const [message, setMessage] = React.useState('');
   const [shouldScroll, setShouldScroll] = React.useState(false);
   const [userInteracting, setUserInteracting] = React.useState(false);
-  const socket = React.useMemo(() => io(`${process.env.REACT_APP_BASE_URL}:5000`), []);
+  const geminiSocket = React.useMemo(() => io(`${process.env.REACT_APP_BASE_URL}:5000`), []);
   const emotionSocket = React.useMemo(() => io(`${process.env.REACT_APP_BASE_URL}:5001`), []);
 
   React.useEffect(() => {
-    socket.on('receive_token', (data) => {
+    geminiSocket.on('receive_token', (data) => {
       setIsLoading(false);
 
       setMessages(prevMessages => {
@@ -41,9 +41,9 @@ function Dashboard({ setUserSignIn, userData }) {
     });
 
     return () => {
-      socket.off('receive_token');
+      geminiSocket.off('receive_token');
     };
-  }, [socket]);
+  }, [geminiSocket]);
 
   React.useEffect(() => {
     if (shouldScroll && !userInteracting) {
@@ -61,7 +61,7 @@ function Dashboard({ setUserSignIn, userData }) {
     setIsLoading(true);
     setShouldScroll(true);
     setUserInteracting(false);
-    socket.emit('send_prompt', { prompt: message });
+    geminiSocket.emit('send_prompt', { prompt: message });
   };
 
   const handleAnalyzeEmotion = (index) => {
