@@ -29,7 +29,7 @@ def authenticate_user(token):
         decoded_token = auth.verify_id_token(token)
         uid = decoded_token['uid']
         return uid  # Return the user's UID if the token is valid
-    except Exception as e:
+    except Exception:
         return None
 
 def classify_emotion_with_text2emotion(poem):
@@ -49,6 +49,7 @@ def handle_connect():
             emit('auth_error', {'error': "Invalid token, disconnecting..."})
             disconnect()
     else:
+        print("No token provided, disconnecting...")
         emit('auth_error', {'error': "No token provided, disconnecting..."})
         disconnect()
 
