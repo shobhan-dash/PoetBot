@@ -67,4 +67,4 @@ def handle_analyze_emotion_request(data):
 
 def run_emotion_app():
     print("Starting Emotion Analyzer on port 5001...")
-    socketio.run(app, port=5001)
+    socketio.run(app, host='0.0.0.0', port=5001)

@@ -39,7 +39,6 @@
 
    - Install required libraries:
      ```bash
-     pip freeze > requirements.txt # Exact versions provided to prevent package conflicts
      pip install -r requirements.txt
      ```
 

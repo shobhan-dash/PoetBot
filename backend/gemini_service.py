@@ -82,4 +82,4 @@ def handle_send_prompt(data):
 
 def run_gemini_app():
     print("Starting Gemini on port 5000...")
-    socketio.run(app, port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000)
