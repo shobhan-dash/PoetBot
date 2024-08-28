@@ -1,7 +1,11 @@
 # Backend
 backend/poetbot
+backend/poetbot2
 backend/__pycache__
 backend/.env
+
+#Auth
+frontend/src/components/auth/poetbot-firebase-adminsdk.json
 
 # Logs
 logs

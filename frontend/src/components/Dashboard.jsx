@@ -8,6 +8,7 @@ import ModelResponse from './models/ModelResponse';
 import PoetBotLogo from '../assets/images/poetbot-logo.png';
 import EmotionBotLogo from '../assets/images/emotionbot-logo.png';
 import SamplePrompts from './SamplePrompts';
+import { getAuth } from "firebase/auth";
 
 function Dashboard({ setUserSignIn, userData }) {
   const [messages, setMessages] = React.useState([]);
@@ -17,32 +18,59 @@ function Dashboard({ setUserSignIn, userData }) {
   const [message, setMessage] = React.useState('');
   const [shouldScroll, setShouldScroll] = React.useState(false);
   const [userInteracting, setUserInteracting] = React.useState(false);
-  const geminiSocket = React.useMemo(() => io(`${process.env.REACT_APP_BASE_URL}:5000`), []);
-  const emotionSocket = React.useMemo(() => io(`${process.env.REACT_APP_BASE_URL}:5001`), []);
+
+  const [geminiSocket, setGeminiSocket] = React.useState(null);
+  const [emotionSocket, setEmotionSocket] = React.useState(null);
 
   React.useEffect(() => {
-    geminiSocket.on('receive_token', (data) => {
-      setIsLoading(false);
-
-      setMessages(prevMessages => {
-        const newMessages = [...prevMessages];
-        const lastMessage = newMessages[newMessages.length - 1];
-
-        if (lastMessage && lastMessage.type === 'modelResponse') {
-          lastMessage.tokens += data.token;
-        } else {
-          newMessages.push({ type: 'modelResponse', tokens: data.token });
-          setShouldScroll(true);
-          setUserInteracting(false);
-        }
-
-        return newMessages;
+    const auth = getAuth();
+    auth.currentUser.getIdToken().then(token => {
+      const gSocket = io(`${process.env.REACT_APP_BASE_URL}:5000`, {
+        query: { token }
       });
-    });
 
-    return () => {
-      geminiSocket.off('receive_token');
-    };
+      const eSocket = io(`${process.env.REACT_APP_BASE_URL}:5001`, {
+        query: { token }
+      });
+
+      setGeminiSocket(gSocket);
+      setEmotionSocket(eSocket);
+
+      gSocket.on('connect', () => console.log('Connected to Gemini Socket'));
+      eSocket.on('connect', () => console.log('Connected to Emotion Socket'));
+
+      return () => {
+        gSocket.disconnect();
+        eSocket.disconnect();
+      };
+    });
+  }, []);
+
+  React.useEffect(() => {
+    if (geminiSocket) {
+      geminiSocket.on('receive_token', (data) => {
+        setIsLoading(false);
+
+        setMessages(prevMessages => {
+          const newMessages = [...prevMessages];
+          const lastMessage = newMessages[newMessages.length - 1];
+
+          if (lastMessage && lastMessage.type === 'modelResponse') {
+            lastMessage.tokens += data.token;
+          } else {
+            newMessages.push({ type: 'modelResponse', tokens: data.token });
+            setShouldScroll(true);
+            setUserInteracting(false);
+          }
+
+          return newMessages;
+        });
+      });
+
+      return () => {
+        geminiSocket.off('receive_token');
+      };
+    }
   }, [geminiSocket]);
 
   React.useEffect(() => {
