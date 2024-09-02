@@ -41,7 +41,12 @@
      ```bash
      pip install -r requirements.txt
      ```
+4. Add Secret Keys
+  - Rename the ENV files: Rename `.env.example` file in the root and backend dirs to `.end`
+  - Add the required secret keys (could be procured from relevant sources)
+  - Create a new file `poetbot-firebase-adminsdk.json` in `frontend/src/components/auth` and add your admin SDK keys from firebase (required list of keys provided in `frontend/src/components/auth/firebase-admin-sdk-sample.txt`)
 
+  
 ## Running the App
 
 1. **Start the Frontend:**  

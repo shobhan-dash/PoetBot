@@ -131,6 +131,17 @@ function Dashboard({ setUserSignIn, userData }) {
       </div>
 
       <div className="text-center w-full p-4">
+
+        <h2 className="mt-4 text-red-400">
+          Unfortunately, the backend isn't properly integrated with Nginx. <br />
+          <a
+            href="https://drive.google.com/file/d/19Dy8djJ9UaBvCuNQwNKnaHu0LgtU6iH2/view?usp=drive_link"
+            className="text-blue-400 underline"
+          >
+            So here's a short video demo of the app
+          </a>
+        </h2>
+
         <Box className="chat-history text-left rounded" sx={{ maxHeight: '70vh', overflowY: 'auto' }}>
           {messages.map((message, index) => (
             <React.Fragment key={index}>
