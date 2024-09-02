@@ -25,105 +25,130 @@ function Dashboard({ setUserSignIn, userData }) {
   React.useEffect(() => {
     const auth = getAuth();
     auth.currentUser.getIdToken().then(token => {
-      const gSocket = io(`${process.env.REACT_APP_BASE_URL}/poetbot/gemini/socket.io`, {
-        query: { token },
-        transports: ['websocket'], // Ensure WebSocket transport
-      });
+      try {
+        const gSocket = io(`${process.env.REACT_APP_BASE_URL}/poetbot/gemini/socket.io`, {
+          query: { token },
+          transports: ['websocket'], // Ensure WebSocket transport
+        });
 
-      const eSocket = io(`${process.env.REACT_APP_BASE_URL}/poetbot/emotion/socket.io`, {
-        query: { token },
-        transports: ['websocket'], // Ensure WebSocket transport
-      });
+        const eSocket = io(`${process.env.REACT_APP_BASE_URL}/poetbot/emotion/socket.io`, {
+          query: { token },
+          transports: ['websocket'], // Ensure WebSocket transport
+        });
 
-      setGeminiSocket(gSocket);
-      setEmotionSocket(eSocket);
+        gSocket.on('connect', () => console.log('Connected to Gemini Socket'));
+        eSocket.on('connect', () => console.log('Connected to Emotion Socket'));
 
-      gSocket.on('connect', () => console.log('Connected to Gemini Socket'));
-      eSocket.on('connect', () => console.log('Connected to Emotion Socket'));
+        gSocket.on('connect_error', (err) => {
+          console.error('Gemini Socket connection error:', err);
+        });
 
-      return () => {
-        gSocket.disconnect();
-        eSocket.disconnect();
-      };
+        eSocket.on('connect_error', (err) => {
+          console.error('Emotion Socket connection error:', err);
+        });
+
+        setGeminiSocket(gSocket);
+        setEmotionSocket(eSocket);
+
+        return () => {
+          gSocket.disconnect();
+          eSocket.disconnect();
+        };
+      } catch (error) {
+        console.error('Error setting up WebSocket connections:', error);
+      }
+    }).catch(error => {
+      console.error('Error fetching authentication token:', error);
     });
   }, []);
 
   React.useEffect(() => {
     if (geminiSocket) {
-      geminiSocket.on('receive_token', (data) => {
-        setIsLoading(false);
+      try {
+        geminiSocket.on('receive_token', (data) => {
+          setIsLoading(false);
 
-        setMessages(prevMessages => {
-          const newMessages = [...prevMessages];
-          const lastMessage = newMessages[newMessages.length - 1];
+          setMessages(prevMessages => {
+            const newMessages = [...prevMessages];
+            const lastMessage = newMessages[newMessages.length - 1];
 
-          if (lastMessage && lastMessage.type === 'modelResponse') {
-            lastMessage.tokens += data.token;
-          } else {
-            newMessages.push({ type: 'modelResponse', tokens: data.token });
-            setShouldScroll(true);
-            setUserInteracting(false);
-          }
+            if (lastMessage && lastMessage.type === 'modelResponse') {
+              lastMessage.tokens += data.token;
+            } else {
+              newMessages.push({ type: 'modelResponse', tokens: data.token });
+              setShouldScroll(true);
+              setUserInteracting(false);
+            }
 
-          return newMessages;
+            return newMessages;
+          });
         });
-      });
-
-      return () => {
-        geminiSocket.off('receive_token');
-      };
+      } catch (error) {
+        console.error('Error handling receive_token event:', error);
+      }
     }
   }, [geminiSocket]);
 
   React.useEffect(() => {
     if (shouldScroll && !userInteracting) {
-      endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-      setShouldScroll(false);
+      try {
+        endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+        setShouldScroll(false);
+      } catch (error) {
+        console.error('Error scrolling to end of messages:', error);
+      }
     }
   }, [messages, shouldScroll, userInteracting]);
 
   const handleSendPrompt = (message) => {
-    setMessages(prevMessages => [
-      ...prevMessages,
-      { type: 'userMessage', content: message },
-      { type: 'modelResponse', tokens: '', emotionData: null },
-    ]);
-    setIsLoading(true);
-    setShouldScroll(true);
-    setUserInteracting(false);
-    geminiSocket.emit('send_prompt', { prompt: message });
+    try {
+      setMessages(prevMessages => [
+        ...prevMessages,
+        { type: 'userMessage', content: message },
+        { type: 'modelResponse', tokens: '', emotionData: null },
+      ]);
+      setIsLoading(true);
+      setShouldScroll(true);
+      setUserInteracting(false);
+      geminiSocket.emit('send_prompt', { prompt: message });
+    } catch (error) {
+      console.error('Error sending prompt:', error);
+    }
   };
 
   const handleAnalyzeEmotion = (index) => {
-    const poem = messages[index].tokens;
-
-    setIsEmotionLoading(prevLoading => {
-      const updatedLoading = [...prevLoading];
-      updatedLoading[index] = true;
-      return updatedLoading;
-    });
-
-    emotionSocket.emit('analyze_emotion_request', { poem });
-
-    const handleEmotionResponse = (data) => {
-      setMessages(prevMessages => {
-        const updatedMessages = [...prevMessages];
-        updatedMessages[index].emotionData = data;
-        return updatedMessages;
-      });
+    try {
+      const poem = messages[index].tokens;
 
       setIsEmotionLoading(prevLoading => {
         const updatedLoading = [...prevLoading];
-        updatedLoading[index] = false;
+        updatedLoading[index] = true;
         return updatedLoading;
       });
 
-      emotionSocket.off('analyze_emotion_response', handleEmotionResponse);
-    };
+      emotionSocket.emit('analyze_emotion_request', { poem });
 
-    emotionSocket.on('analyze_emotion_response', handleEmotionResponse);
+      const handleEmotionResponse = (data) => {
+        setMessages(prevMessages => {
+          const updatedMessages = [...prevMessages];
+          updatedMessages[index].emotionData = data;
+          return updatedMessages;
+        });
 
-    setUserInteracting(true);
+        setIsEmotionLoading(prevLoading => {
+          const updatedLoading = [...prevLoading];
+          updatedLoading[index] = false;
+          return updatedLoading;
+        });
+
+        emotionSocket.off('analyze_emotion_response', handleEmotionResponse);
+      };
+
+      emotionSocket.on('analyze_emotion_response', handleEmotionResponse);
+      setUserInteracting(true);
+    } catch (error) {
+      console.error('Error analyzing emotion:', error);
+    }
   };
 
   return (
@@ -133,7 +158,6 @@ function Dashboard({ setUserSignIn, userData }) {
       </div>
 
       <div className="text-center w-full p-4">
-
         <h2 className="mt-4 text-red-400">
           Unfortunately, the backend isn't properly integrated with Nginx. <br />
           <a

@@ -39,7 +39,8 @@ def authenticate_user(token):
         decoded_token = auth.verify_id_token(token)
         uid = decoded_token['uid']
         return uid  # Return the user's UID if the token is valid
-    except Exception:
+    except Exception as e:
+        emit('error', {'error': f"Authentication error: {e}"})
         return None
 
 def generate_poem(user_prompt):
@@ -54,34 +55,40 @@ def generate_poem(user_prompt):
         for token in response:
             yield token.text
     except Exception as e:
+        emit('error', {'error': f"Error generating poem: {e}"})
         yield f"[Error]: {str(e)}"
 
 @socketio.on('connect')
 def handle_connect():
-    token = request.args.get('token')
-    if token:
-        user_id = authenticate_user(token)
-        if user_id:
-            print(f"User {user_id} connected")
+    try:
+        token = request.args.get('token')
+        if token:
+            user_id = authenticate_user(token)
+            if user_id:
+                print(f"User {user_id} connected")
+            else:
+                emit('auth_error', {'error': "Invalid token, disconnecting..."})
+                disconnect()
         else:
-            print("Invalid token, disconnecting...")
-            emit('auth_error', {'error': "Invalid token, disconnecting..."})
+            emit('auth_error', {'error': "No token provided, disconnecting..."})
             disconnect()
-    else:
-        print("No token provided, disconnecting...")
-        emit('auth_error', {'error': "No token provided, disconnecting..."})
-        disconnect()
+    except Exception as e:
+        emit('error', {'error': f"Error handling connection: {e}"})
 
 @socketio.on('send_prompt')
 def handle_send_prompt(data):
-    user_prompt = data['prompt']
     try:
+        user_prompt = data['prompt']
         for token in generate_poem(user_prompt):
             socketio.sleep(0.5)
-            emit('receive_token', {'token': token}, broadcast=False)
+            emit('receive_token', {'token': token})
     except Exception as e:
-        emit('receive_token', {'token': f"[Error]: {str(e)}"}, broadcast=False)
+        emit('receive_token', {'token': f"[Error]: {str(e)}"})
+        emit('error', {'error': f"Error handling send_prompt: {e}"})
 
 def run_gemini_app():
     print("Starting Gemini on port 5000...")
     socketio.run(app, host='0.0.0.0', port=5000)
+
+if __name__ == '__main__':
+    run_gemini_app()
