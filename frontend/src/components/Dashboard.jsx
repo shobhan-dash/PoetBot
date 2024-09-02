@@ -25,12 +25,14 @@ function Dashboard({ setUserSignIn, userData }) {
   React.useEffect(() => {
     const auth = getAuth();
     auth.currentUser.getIdToken().then(token => {
-      const gSocket = io(`${process.env.REACT_APP_BASE_URL}:5000`, {
-        query: { token }
+      const gSocket = io(`${process.env.REACT_APP_BASE_URL}/poetbot/gemini/socket.io`, {
+        query: { token },
+        transports: ['websocket'], // Ensure WebSocket transport
       });
 
-      const eSocket = io(`${process.env.REACT_APP_BASE_URL}:5001`, {
-        query: { token }
+      const eSocket = io(`${process.env.REACT_APP_BASE_URL}/poetbot/emotion/socket.io`, {
+        query: { token },
+        transports: ['websocket'], // Ensure WebSocket transport
       });
 
       setGeminiSocket(gSocket);
