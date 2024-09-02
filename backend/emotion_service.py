@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit, disconnect
 import text2emotion as te
 import firebase_admin
@@ -23,6 +23,10 @@ initialize_firebase()
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+@app.route('/emotion', methods=['GET'])
+def emotion_status():
+    return jsonify({"status": "Emotion Analyzer Online"}), 200
 
 def authenticate_user(token):
     try:

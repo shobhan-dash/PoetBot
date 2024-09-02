@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit, disconnect
 import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
@@ -30,6 +30,10 @@ base_prompt = "You are PoetBot, an AI poem generator. Must reply in at most 10 l
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
+@app.route('/gemini', methods=['GET'])
+def gemini_status():
+    return jsonify({"status": "Gemini Online"}), 200
+
 def authenticate_user(token):
     try:
         decoded_token = auth.verify_id_token(token)
@@ -41,14 +45,12 @@ def authenticate_user(token):
 def generate_poem(user_prompt):
     prompt = base_prompt + user_prompt
     try:
-        # Define safety settings
         custom_safety_settings = {
             HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_ONLY_HIGH,
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
         }
         response = model.generate_content(prompt, stream=True, safety_settings=custom_safety_settings)
         
-        # Stream tokens while checking for errors
         for token in response:
             yield token.text
     except Exception as e:
