@@ -7,6 +7,8 @@ backend/.env
 #Auth
 frontend/src/components/auth/poetbot-firebase-adminsdk.json
 
+# Nginx
+nginx.conf
 # Logs
 logs
 *.log

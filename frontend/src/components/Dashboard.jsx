@@ -26,15 +26,29 @@ function Dashboard({ setUserSignIn, userData }) {
     const auth = getAuth();
     auth.currentUser.getIdToken().then(token => {
       try {
-        const gSocket = io(`${process.env.REACT_APP_BASE_URL}/poetbot/gemini/socket.io`, {
+        // =================================== Local Testing =======================================
+        // const gSocket = io(`${process.env.REACT_APP_BASE_URL}:5000`, {
+        //   query: { token },
+        //   transports: ['websocket'], // Ensure WebSocket transport
+        // });
+
+        // const eSocket = io(`${process.env.REACT_APP_BASE_URL}:5001`, {
+        //   query: { token },
+        //   transports: ['websocket'], // Ensure WebSocket transport
+        // });
+        // ===========================================================================================
+
+        // =================================== Production ============================================
+        const gSocket = io(`${process.env.REACT_APP_BASE_URL}/poetbot/socket.io-gemini`, {
           query: { token },
-          transports: ['websocket'], // Ensure WebSocket transport
+          transports: ['websocket'],
         });
 
-        const eSocket = io(`${process.env.REACT_APP_BASE_URL}/poetbot/emotion/socket.io`, {
+        const eSocket = io(`${process.env.REACT_APP_BASE_URL}/poetbot/socket.io-emotion`, {
           query: { token },
-          transports: ['websocket'], // Ensure WebSocket transport
+          transports: ['websocket'],
         });
+        // ===========================================================================================
 
         gSocket.on('connect', () => console.log('Connected to Gemini Socket'));
         eSocket.on('connect', () => console.log('Connected to Emotion Socket'));
