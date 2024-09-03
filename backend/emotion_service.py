@@ -22,7 +22,7 @@ def initialize_firebase():
 initialize_firebase()
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*", path='/poetbot/socket.io-gemini')
+socketio = SocketIO(app, cors_allowed_origins="*", path='/poetbot/socket.io-emotion')
 
 @app.route('/emotion', methods=['GET'])
 def emotion_status():

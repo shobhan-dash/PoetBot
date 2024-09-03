@@ -28,13 +28,15 @@ function Dashboard({ setUserSignIn, userData }) {
       try {
         // =================================== Local Testing =======================================
         // const gSocket = io(`${process.env.REACT_APP_BASE_URL}:5000`, {
+        //   path: '/poetbot/socket.io-gemini',
         //   query: { token },
-        //   transports: ['websocket'], // Ensure WebSocket transport
+        //   transports: ['websocket'],
         // });
 
         // const eSocket = io(`${process.env.REACT_APP_BASE_URL}:5001`, {
+        //   path: '/poetbot/socket.io-emotion',
         //   query: { token },
-        //   transports: ['websocket'], // Ensure WebSocket transport
+        //   transports: ['websocket'],
         // });
         // ===========================================================================================
 
