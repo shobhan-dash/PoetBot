@@ -55,15 +55,12 @@ function Dashboard({ setUserSignIn, userData }) {
         // ===========================================================================================
 
         gSocket.on('connect', () => console.log('Connected to Gemini Socket'));
+        gSocket.on('connect_error', (err) => console.error('Gemini Socket connection error:', err));
+        gSocket.on('error', (err) => console.error('Gemini Socket error:', err));
+
         eSocket.on('connect', () => console.log('Connected to Emotion Socket'));
-
-        gSocket.on('connect_error', (err) => {
-          console.error('Gemini Socket connection error:', err);
-        });
-
-        eSocket.on('connect_error', (err) => {
-          console.error('Emotion Socket connection error:', err);
-        });
+        eSocket.on('connect_error', (err) => console.error('Emotion Socket connection error:', err));
+        eSocket.on('error', (err) => console.error('Emotion Socket error:', err));
 
         setGeminiSocket(gSocket);
         setEmotionSocket(eSocket);
