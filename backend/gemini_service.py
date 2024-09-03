@@ -28,7 +28,7 @@ model = genai.GenerativeModel('gemini-1.5-flash')
 base_prompt = "You are PoetBot, an AI poem generator. Must reply in at most 10 lines."
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", path='/poetbot/socket.io-gemini')
 
 @app.route('/gemini', methods=['GET'])
 def gemini_status():

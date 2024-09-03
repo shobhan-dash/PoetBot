@@ -39,12 +39,14 @@ function Dashboard({ setUserSignIn, userData }) {
         // ===========================================================================================
 
         // =================================== Production ============================================
-        const gSocket = io(`${process.env.REACT_APP_BASE_URL}/poetbot/socket.io-gemini`, {
+        const gSocket = io(`${process.env.REACT_APP_BASE_URL}`, {
+          path: '/poetbot/socket.io-gemini',
           query: { token },
           transports: ['websocket'],
         });
 
-        const eSocket = io(`${process.env.REACT_APP_BASE_URL}/poetbot/socket.io-emotion`, {
+        const eSocket = io(`${process.env.REACT_APP_BASE_URL}`, {
+          path: '/poetbot/socket.io-emotion',
           query: { token },
           transports: ['websocket'],
         });
