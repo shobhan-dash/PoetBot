@@ -54,6 +54,7 @@ def handle_connect():
             user_id = authenticate_user(token)
             if user_id:
                 print(f"User {user_id} connected")
+                emit('connect_success', {'message': 'Successfully connected to the Emotion Analyzer server!'})
             else:
                 emit('auth_error', {'error': "Invalid token, disconnecting..."})
                 disconnect()
