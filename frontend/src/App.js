@@ -4,7 +4,12 @@ import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
 
 function App() {
-  const { isUserSignedIn } = useContext(UserContext); // Access context after wrapping
+  const { isUserSignedIn, isLoading } = useContext(UserContext);
+
+  // Show a loading indicator while determining auth state
+  if (isLoading) {
+    return <div className='bg-gray-900'></div>;
+  }
 
   return isUserSignedIn ? <Dashboard /> : <LandingPage />;
 }

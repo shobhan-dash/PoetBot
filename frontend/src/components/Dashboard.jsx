@@ -1,9 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useCallback,
-} from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Box } from "@mui/material";
 import io from "socket.io-client";
 import SideBar from "./SideBar";
@@ -44,6 +39,21 @@ function Dashboard() {
             query: { token },
             transports: ["websocket"],
           });
+          // =================================== Local Testing =======================================
+
+          // =================================== Production ==========================================
+          // const gSocket = io('https://sidadi.centralindia.cloudapp.azure.com', {
+          //   path: "/poetbot/socket.io-gemini",
+          //   query: { token },
+          //   transports: ["websocket"],
+          // });
+
+          // const eSocket = io('https://sidadi.centralindia.cloudapp.azure.com', {
+          //   path: "/poetbot/socket.io-emotion",
+          //   query: { token },
+          //   transports: ["websocket"],
+          // });
+          // =================================== Production =======================================
 
           gSocket.on("connect_error", (err) =>
             console.error("Gemini Socket connection error:", err)
@@ -166,7 +176,7 @@ function Dashboard() {
   return (
     <div className="relative flex items-center justify-center h-screen bg-gray-900 text-white">
       <div className="absolute top-0 left-0 p-4">
-        <SideBar/>
+        <SideBar />
       </div>
 
       <div className="text-center w-full p-4">
