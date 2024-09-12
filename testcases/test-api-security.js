@@ -1,47 +1,59 @@
-// If invalid token is given, the client's console remains silent and the server logs the invalid token error.
-// With a valid token (could be obtained via logging from server and using it here), the client's console logs the connection and response messages.
-
 const io = require('socket.io-client');
 
-const geminiSocket = io('http://localhost:5000', {
-    query: { token: 'invalid_token' }
-});
+// Function to handle authentication, connection, and prompt sending
+function connectToService(serviceName, url, path, token, prompt) {
+    const socket = io(url, {
+        transports: ['websocket'],  
+        path: path,                 
+        query: { token },           
+        pingTimeout: 60000,         
+        pingInterval: 25000         
+    });
 
-const emotionSocket = io('http://localhost:5001', {
-    query: { token: 'invalid_token' }
-});
+    // Handle connection success
+    socket.on('connect', () => {
+        console.log(`${serviceName} connected successfully.`);
 
-// Event listeners setup
-geminiSocket.on('connect', () => {
-    console.log('Connected to Gemini Socket');
-    geminiSocket.emit('send_prompt', { prompt: 'Tale of two friends' });
-});
+        // Sending prompt after successful connection
+        if (prompt) {
+            socket.emit('send_prompt', { prompt });
+        }
+    });
 
-geminiSocket.on('receive_token', (data) => {
-    console.log('Gemini token received:', data);
-});
+    // Handle connection errors (e.g., auth errors, missing tokens)
+    socket.on('connect_error', (error) => {
+        console.error(`${serviceName} connection error: ${error.message}`);
+    });
 
-geminiSocket.on('auth_error', (data) => {
-    console.error('Gemini Authentication error:', data.error);
-});
+    socket.on('auth_error', (data) => {
+        console.error(`${serviceName} authentication error: ${data.error}`);
+        socket.disconnect();
+    });
 
-geminiSocket.on('connect_error', (err) => {
-    console.error('Gemini Connection error:', err.message);
-});
+    // Handle poem generation (streaming tokens)
+    socket.on('receive_token', (data) => {
+        console.log(`${serviceName} received token: ${data.token}`);
+    });
 
-emotionSocket.on('connect', () => {
-    console.log('Connected to Emotion Socket');
-    emotionSocket.emit('analyze_emotion_request', { poem: 'Test poem' });
-});
+    // General error handler
+    socket.on('error', (error) => {
+        console.error(`${serviceName} error: ${error.error}`);
+    });
 
-emotionSocket.on('analyze_emotion_response', (data) => {
-    console.log('Emotion analysis response:', data);
-});
+    // Handle disconnection
+    socket.on('disconnect', () => {
+        console.log(`${serviceName} disconnected.`);
+    });
+}
 
-emotionSocket.on('auth_error', (data) => {
-    console.log('Emotion Authentication error:', data.error);
-});
+// Generate a valid token or use an existing one
+const userToken = 'your_firebase_user_token';  // Replace with a valid Firebase token
 
-emotionSocket.on('connect_error', (err) => {
-    console.log('Emotion Connection error:', err.message);
-});
+// Define the prompt to send to Gemini
+const prompt = "Write a poem about the ocean.";
+
+// Connect to Gemini service (port 5000)
+connectToService('Gemini', 'http://localhost:5000', '/poetbot/socket.io-gemini', userToken, prompt);
+
+// You can also add the Emotion service connection here in a similar way if needed
+connectToService('Emotion', 'http://localhost:5001', '/poetbot/socket.io-emotion', userToken, null);

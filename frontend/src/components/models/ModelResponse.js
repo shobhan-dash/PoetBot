@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Card, CardContent, Typography, CircularProgress, Button } from '@mui/material';
+import { Box, Card, CardContent, Typography, CircularProgress, Button, Tooltip } from '@mui/material';
 import InsightsIcon from '@mui/icons-material/Insights';
 
 const ModelResponse = ({ tokens, isLoading, onAnalyzeEmotion, emotionData, emotionLogo, isEmotionLoading }) => {
@@ -18,9 +18,9 @@ const ModelResponse = ({ tokens, isLoading, onAnalyzeEmotion, emotionData, emoti
                             variant="body1"
                             component="pre"
                             sx={{
-                                overflowWrap: 'anywhere', // Allow breaks only at word boundaries
-                                whiteSpace: 'pre-wrap',  // Preserve spaces and line breaks
-                                display: 'block', // Ensure full width is utilized
+                                overflowWrap: 'anywhere',
+                                whiteSpace: 'pre-wrap',
+                                display: 'block',
                             }}
                         >
                             {tokens}
@@ -30,21 +30,28 @@ const ModelResponse = ({ tokens, isLoading, onAnalyzeEmotion, emotionData, emoti
             </Card>
             <Box display="flex" flexDirection="column" alignItems="flex-start" mt={2} sx={{ width: '100%' }}>
                 {!emotionData && !isEmotionLoading && (
-                    <Button
-                        onClick={onAnalyzeEmotion}
-                        sx={{
-                            minWidth: 'auto',
-                            padding: 1,
-                            marginBottom: 2,
-                            borderRadius: '8px',
-                            backgroundColor: 'transparent',
-                            '&:hover': {
-                                backgroundColor: '#2d3748',
-                            },
-                        }}
-                    >
-                        <InsightsIcon />
-                    </Button>
+                    <Tooltip title="Analyze Emotion" arrow>
+                        <Button
+                            onClick={onAnalyzeEmotion}
+                            sx={{
+                                minWidth: 'auto',
+                                padding: 1,
+                                marginBottom: 2,
+                                borderRadius: '8px',
+                                backgroundColor: 'transparent',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                width: '40px', 
+                                height: '40px', 
+                                '&:hover': {
+                                    backgroundColor: '#2d3748',
+                                },
+                            }}
+                        >
+                            <InsightsIcon />
+                        </Button>
+                    </Tooltip>
                 )}
                 {!emotionData && isEmotionLoading && (
                     <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
